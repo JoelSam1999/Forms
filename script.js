@@ -103,11 +103,48 @@ function submitChapter() {
   questions.forEach((q, index) => {
     const selected = document.querySelector(`input[name="q${index}"]:checked`);
 
-    if (
-      selected &&
-      selected.value.trim().toLowerCase() === q.answer.trim().toLowerCase()
-    ) {
-      score++;
+    const labels = document.querySelectorAll(`input[name="q${index}"]`);
+
+    labels.forEach(input => {
+      const label = input.parentElement;
+
+      // Reset styles
+      label.style.color = "";
+      label.style.fontWeight = "";
+    });
+
+    if (selected) {
+      const selectedValue = selected.value.trim().toLowerCase();
+      const correctValue = q.answer.trim().toLowerCase();
+
+      if (selectedValue === correctValue) {
+        score++;
+
+        // ✅ Mark correct answer
+        selected.parentElement.style.color = "green";
+        selected.parentElement.style.fontWeight = "bold";
+
+      } else {
+        // ❌ Mark wrong selection
+        selected.parentElement.style.color = "red";
+
+        // ✅ Highlight correct option
+        labels.forEach(input => {
+          if (input.value.trim().toLowerCase() === correctValue) {
+            input.parentElement.style.color = "green";
+            input.parentElement.style.fontWeight = "bold";
+          }
+        });
+      }
+
+    } else {
+      // ⚠️ Not answered → still show correct
+      labels.forEach(input => {
+        if (input.value.trim().toLowerCase() === q.answer.trim().toLowerCase()) {
+          input.parentElement.style.color = "green";
+          input.parentElement.style.fontWeight = "bold";
+        }
+      });
     }
   });
 
