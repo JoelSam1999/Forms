@@ -7,21 +7,30 @@ let chapterScores = {};
 
 // ✅ Robust CSV parser
 function parseCSV(text) {
-  const rows = text.trim().split("\n").slice(1);
+  const rows = text.trim().split("\n");
 
-  return rows.map(row => {
-    const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+  const headers = rows[0].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+    .map(h => h.replace(/"/g, "").trim());
+
+  return rows.slice(1).map(row => {
+    const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+      .map(c => c.replace(/"/g, "").trim());
+
+    let obj = {};
+    headers.forEach((h, i) => {
+      obj[h] = cols[i];
+    });
 
     return {
-      question: cols[0]?.replace(/"/g, "").trim(),
+      question: obj["Question"],
       options: [
-        cols[1]?.replace(/"/g, "").trim(),
-        cols[2]?.replace(/"/g, "").trim(),
-        cols[3]?.replace(/"/g, "").trim(),
-        cols[4]?.replace(/"/g, "").trim()
+        obj["Option 1"],
+        obj["Option 2"],
+        obj["Option 3"],
+        obj["Option 4"]
       ],
-      answer: cols[5]?.replace(/"/g, "").trim(),
-      chapter: cols[6]?.replace(/"/g, "").trim()
+      answer: obj["Answer Key"],
+      chapter: obj["Chapter"] || "Uncategorized"
     };
   });
 }
@@ -46,6 +55,8 @@ async function loadQuestions() {
     if (chapters.length === 0) {
       document.getElementById("quiz").innerText = "No questions found ❌";
       return;
+      
+    console.log(quizData);
     }
 
     loadChapter();
