@@ -102,49 +102,36 @@ function submitChapter() {
 
   questions.forEach((q, index) => {
     const selected = document.querySelector(`input[name="q${index}"]:checked`);
+    const inputs = document.querySelectorAll(`input[name="q${index}"]`);
 
-    const labels = document.querySelectorAll(`input[name="q${index}"]`);
+    // 👉 Find correct option index
+    const correctIndex = q.options.findIndex(opt =>
+      opt.trim().toLowerCase() === q.answer.trim().toLowerCase()
+    );
 
-    labels.forEach(input => {
+    inputs.forEach((input, i) => {
       const label = input.parentElement;
 
       // Reset styles
       label.style.color = "";
       label.style.fontWeight = "";
+
+      // ✅ Highlight correct option ALWAYS
+      if (i === correctIndex) {
+        label.style.color = "green";
+        label.style.fontWeight = "bold";
+      }
     });
 
     if (selected) {
-      const selectedValue = selected.value.trim().toLowerCase();
-      const correctValue = q.answer.trim().toLowerCase();
+      const selectedIndex = Array.from(inputs).indexOf(selected);
 
-      if (selectedValue === correctValue) {
+      if (selectedIndex === correctIndex) {
         score++;
-
-        // ✅ Mark correct answer
-        selected.parentElement.style.color = "green";
-        selected.parentElement.style.fontWeight = "bold";
-
       } else {
-        // ❌ Mark wrong selection
+        // ❌ Wrong selected → mark red
         selected.parentElement.style.color = "red";
-
-        // ✅ Highlight correct option
-        labels.forEach(input => {
-          if (input.value.trim().toLowerCase() === correctValue) {
-            input.parentElement.style.color = "green";
-            input.parentElement.style.fontWeight = "bold";
-          }
-        });
       }
-
-    } else {
-      // ⚠️ Not answered → still show correct
-      labels.forEach(input => {
-        if (input.value.trim().toLowerCase() === q.answer.trim().toLowerCase()) {
-          input.parentElement.style.color = "green";
-          input.parentElement.style.fontWeight = "bold";
-        }
-      });
     }
   });
 
