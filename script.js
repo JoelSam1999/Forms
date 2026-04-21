@@ -1,7 +1,8 @@
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/12r_xH6gWTLGQQNwG6ry4H6MqXogpOapE/export?format=csv&gid=1237684937";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUkz1Fw9iO-qQKp1b_Fhvtc0jVENzNiu3-jVHEaWYdjKP7kOz7H8_Np6Q2THH9Sw/pub?output=csv";
 
 let questions = [];
 
+// ✅ Robust CSV parser (handles commas inside text)
 function parseCSV(text) {
   const rows = text.trim().split("\n").slice(1);
 
@@ -22,11 +23,20 @@ function parseCSV(text) {
 }
 
 async function loadQuestions() {
-  const res = await fetch(SHEET_URL);
-  const text = await res.text();
+  try {
+    const res = await fetch(SHEET_URL);
+    const text = await res.text();
 
-  questions = parseCSV(text);
-  displayQuiz();
+    console.log("CSV Loaded:", text);
+
+    questions = parseCSV(text);
+    displayQuiz();
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("quiz").innerText =
+      "Error loading questions ❌";
+  }
 }
 
 function displayQuiz() {
