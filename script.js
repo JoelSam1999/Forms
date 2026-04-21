@@ -2,27 +2,30 @@ const SHEET_URL = "https://docs.google.com/spreadsheets/d/12r_xH6gWTLGQQNwG6ry4H
 
 let questions = [];
 
+function parseCSV(text) {
+  const rows = text.trim().split("\n").slice(1);
+
+  return rows.map(row => {
+    const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+
+    return {
+      question: cols[0]?.replace(/"/g, "").trim(),
+      options: [
+        cols[1]?.replace(/"/g, "").trim(),
+        cols[2]?.replace(/"/g, "").trim(),
+        cols[3]?.replace(/"/g, "").trim(),
+        cols[4]?.replace(/"/g, "").trim()
+      ],
+      answer: cols[5]?.replace(/"/g, "").trim()
+    };
+  });
+}
+
 async function loadQuestions() {
   const res = await fetch(SHEET_URL);
   const text = await res.text();
 
-  const rows = text.trim().split("\n").slice(1); // skip header
-
-  questions = rows.map(row => {
-    const cols = row.split(",");
-
-    return {
-      question: cols[0]?.trim(),
-      options: [
-        cols[1]?.trim(),
-        cols[2]?.trim(),
-        cols[3]?.trim(),
-        cols[4]?.trim()
-      ],
-      answer: cols[5]?.trim()
-    };
-  });
-
+  questions = parseCSV(text);
   displayQuiz();
 }
 
