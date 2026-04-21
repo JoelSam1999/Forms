@@ -5,6 +5,16 @@ let chapters = [];
 let currentChapter = 0;
 let chapterScores = {};
 
+// 🔥 Normalize function (fixes ALL matching issues)
+function normalize(text) {
+  return text
+    ?.toString()
+    .toLowerCase()
+    .replace(/[^\w\s]/g, "") // remove punctuation
+    .replace(/\s+/g, " ")    // normalize spaces
+    .trim();
+}
+
 // ✅ Robust CSV parser
 function parseCSV(text) {
   const rows = text.trim().split("\n");
@@ -44,10 +54,12 @@ async function loadQuestions() {
     const questions = parseCSV(text);
 
     questions.forEach(q => {
-      if (!quizData[q.chapter]) {
-        quizData[q.chapter] = [];
+      const chapterName = q.chapter || "Uncategorized";
+
+      if (!quizData[chapterName]) {
+        quizData[chapterName] = [];
       }
-      quizData[q.chapter].push(q);
+      quizData[chapterName].push(q);
     });
 
     chapters = Object.keys(quizData);
@@ -55,8 +67,6 @@ async function loadQuestions() {
     if (chapters.length === 0) {
       document.getElementById("quiz").innerText = "No questions found ❌";
       return;
-      
-    console.log(quizData);
     }
 
     loadChapter();
@@ -67,7 +77,7 @@ async function loadQuestions() {
   }
 }
 
-// ✅ Load one chapter at a time
+// ✅ Load one chapter
 function loadChapter() {
   const chapter = chapters[currentChapter];
   const questions = quizData[chapter];
@@ -93,7 +103,7 @@ function loadChapter() {
   quizDiv.innerHTML += `<button onclick="submitChapter()">Submit Chapter</button>`;
 }
 
-// ✅ Submit chapter
+// ✅ Submit chapter (FINAL FIXED VERSION)
 function submitChapter() {
   const chapter = chapters[currentChapter];
   const questions = quizData[chapter];
@@ -104,9 +114,8 @@ function submitChapter() {
     const selected = document.querySelector(`input[name="q${index}"]:checked`);
     const inputs = document.querySelectorAll(`input[name="q${index}"]`);
 
-    // 👉 Find correct option index
     const correctIndex = q.options.findIndex(opt =>
-      opt.trim().toLowerCase() === q.answer.trim().toLowerCase()
+      normalize(opt) === normalize(q.answer)
     );
 
     inputs.forEach((input, i) => {
@@ -116,7 +125,7 @@ function submitChapter() {
       label.style.color = "";
       label.style.fontWeight = "";
 
-      // ✅ Highlight correct option ALWAYS
+      // ✅ Always show correct answer
       if (i === correctIndex) {
         label.style.color = "green";
         label.style.fontWeight = "bold";
@@ -129,7 +138,7 @@ function submitChapter() {
       if (selectedIndex === correctIndex) {
         score++;
       } else {
-        // ❌ Wrong selected → mark red
+        // ❌ Wrong answer
         selected.parentElement.style.color = "red";
       }
     }
